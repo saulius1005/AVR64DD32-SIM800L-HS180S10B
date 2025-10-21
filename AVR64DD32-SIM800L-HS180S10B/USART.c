@@ -31,9 +31,10 @@ char USART0_readChar() {
 	while (!(USART0.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
 		if (--timeout_counter == 0) { // Timeout condition
 			RS485.lost_signal_fault = true;
+/*
 			st7735_draw_text(0, 0,"USART0 timeout", RED, BLACK);
 			_delay_ms(100);
-			st7735_draw_text(0, 0,"              ", RED, BLACK);
+			st7735_draw_text(0, 0,"              ", RED, BLACK);*/
 			break;
 		}
 	}
@@ -95,7 +96,7 @@ int USART0_printChar(char c, FILE *stream) {
  * transmission and reception at a baud rate of 2.5 Mbps with double-speed operation.
  */
 void USART1_init() {
-	USART1.BAUD = (uint16_t)USART1_BAUD_RATE(460800); // Set baud rate to 460.8 kbps for fiber optic
+	USART1.BAUD = (uint16_t)USART1_BAUD_RATE(115200); // Set baud rate to 460.8 kbps for fiber optic
 	USART1.CTRLB = USART_RXEN_bm | USART_TXEN_bm  | USART_RXMODE_CLK2X_gc; // Enable RX, TX, double speed mode
 	USART1.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc; // Configure for 8-bit, no parity, 1 stop bit, asynchronous mode
 }
@@ -137,10 +138,9 @@ char USART1_readChar() {
 	uint32_t timeout_counter = SIM800L_TIMEOUT_COUNTER; // Set a timeout counter
 	while (!(USART1.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
 		if (--timeout_counter == 0) { // Timeout condition
-/*
-			st7735_draw_text(0, 0,"USART1 timeout", RED, BLACK);
-			_delay_ms(100);
-			st7735_draw_text(0, 0,"              ", RED, BLACK);*/
+// 			st7735_draw_text(0, 0,"USART1 timeout", RED, BLACK);
+// 			_delay_ms(100);
+// 			st7735_draw_text(0, 0,"              ", RED, BLACK);
 			SIM800L.lost_signal_fault = true;
 			break; //just exit from this while cycle
 		}

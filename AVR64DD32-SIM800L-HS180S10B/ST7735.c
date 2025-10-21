@@ -350,3 +350,37 @@ void screen_write_formatted_text(const char *format, uint8_t line, alignment_t a
 
     screen_write_text_aligned(textStorage, line, alignment);  ///< Write formatted text to display
 }
+
+void st7735_draw_text_wrap(int x, int y, const char *str, uint16_t fg, uint16_t bg) {
+	int start_x = x;                        // Pradinë eilutës x reikðmë
+	const int char_width = 6;               // 5 px simbolis + 1 px tarpas
+	const int line_height = 8;              // 7 px aukðtis + 1 px tarpas
+
+	while (*str) {
+		if (*str == '\r') {
+			// Carriage return – gráþtam á eilutës pradþià
+			x = start_x;
+			} else if (*str == '\n') {
+			// Newline – pereinam á naujà eilutæ
+			x = start_x;
+			y += line_height;
+			} else {
+			// Automatinis lauþymas, jei pasiekiam ekrano kraðtà
+			if (x + char_width > ST7735_WIDTH) {
+				x = start_x;
+				y += line_height;
+			}
+
+			// Patikrinam, ar dar telpam á ekranà vertikaliai
+			if (y + line_height > ST7735_HEIGHT) {
+				// Nebetelpam – baigiam spausdinimà
+				break;
+			}
+
+			st7735_draw_char(x, y, *str, fg, bg);
+			x += char_width;
+		}
+
+		str++;
+	}
+}

@@ -13,8 +13,9 @@ void GPIO_init(){
     PORTMUX.USARTROUTEA = PORTMUX_USART1_DEFAULT_gc /*| PORTMUX_USART0_ALT2_gc*/; // Set USART0 to alternative pins set default
 	PORTMUX.SPIROUTEA = PORTMUX_SPI0_DEFAULT_gc;
 	
-	// PA4=MOSI, PA6=SCK, PA7=CS, PA2=DC, PA3=RES kaip out
+	// PA4=MOSI, PA6=SCK, PA7=CS kaip out
 	PORTA.DIRSET = PIN2_bm | PIN3_bm | PIN4_bm | PIN6_bm | PIN7_bm;
+	//PD2=DC, PD3=RES
 	PORTD.DIRSET = PIN2_bm | PIN3_bm; //screen DC and RES
 
 	PORTD.DIRSET = PIN4_bm | PIN7_bm; //USART0 RS485 TX, XDIR 

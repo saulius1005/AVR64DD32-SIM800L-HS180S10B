@@ -29,19 +29,20 @@ uint64_t hexToUint64(const char *str) {
 }
 
 void SIM800LDataSplitter(char *command) {
-	st7735_draw_text(0, 32, command, BLUE, BLACK);
+	//st7735_draw_text_wrap(0, 52, command, BLUE, BLACK);
+	_delay_ms(2000);
 }
 
 void SIM800LUARTReceiver() {
 	uint8_t index = 0;
-	char command[MESSAGE_LENGTH_SIM800L] = {0}; // Empty command array
+	char command[MESSAGE_LENGTH_SIM800L]={0}; // Empty command array
 	SIM800L.lost_signal_fault = false;
 	while (!SIM800L.lost_signal_fault) {
 		char c = USART1_readChar(); // Reading a character from USART
 		command[index++] = c; // Store received character in command array
 	}
-		command[index] = '\0';
-		index = 0;
+// 		command[index] = '\0';
+// 		index = 0;
 		SIM800LDataSplitter(command); // Execute the received command //comment when testing lines below
 
 }

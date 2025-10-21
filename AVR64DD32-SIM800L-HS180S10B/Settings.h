@@ -146,6 +146,8 @@ void lcd_fill_color(uint16_t color);
 
 void st7735_draw_text(int x, int y, const char *str, uint16_t fg, uint16_t bg);
 
+void st7735_draw_text_wrap(int x, int y, const char *str, uint16_t fg, uint16_t bg);
+
 void SIM800LUARTReceiver();
 
 void display_gps_date_and_time(AllGPSData *data);
