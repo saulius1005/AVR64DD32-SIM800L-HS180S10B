@@ -40,6 +40,7 @@ C_SRCS +=  \
 ../BK-280.c \
 ../CLK.c \
 ../GPIO.c \
+../LoadAnimation.c \
 ../main.c \
 ../RS485LED.c \
 ../RS485USART.c \
@@ -60,6 +61,7 @@ OBJS +=  \
 BK-280.o \
 CLK.o \
 GPIO.o \
+LoadAnimation.o \
 main.o \
 RS485LED.o \
 RS485USART.o \
@@ -73,6 +75,7 @@ OBJS_AS_ARGS +=  \
 BK-280.o \
 CLK.o \
 GPIO.o \
+LoadAnimation.o \
 main.o \
 RS485LED.o \
 RS485USART.o \
@@ -86,6 +89,7 @@ C_DEPS +=  \
 BK-280.d \
 CLK.d \
 GPIO.d \
+LoadAnimation.d \
 main.d \
 RS485LED.d \
 RS485USART.d \
@@ -99,6 +103,7 @@ C_DEPS_AS_ARGS +=  \
 BK-280.d \
 CLK.d \
 GPIO.d \
+LoadAnimation.d \
 main.d \
 RS485LED.d \
 RS485USART.d \
@@ -137,6 +142,13 @@ LINKER_SCRIPT_DEP+=
 	
 
 ./GPIO.o: .././GPIO.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=avr64dd32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\gcc\dev\avr64dd32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+./LoadAnimation.o: .././LoadAnimation.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=avr64dd32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\gcc\dev\avr64dd32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

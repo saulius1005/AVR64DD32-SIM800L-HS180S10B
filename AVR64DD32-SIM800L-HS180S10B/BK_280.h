@@ -19,13 +19,6 @@ typedef struct {
     uint8_t day;
     uint8_t month;
     uint8_t year; // tik paskutiniai du skaitmenys, pvz. 23 -> 2023
-} RMC_Data;
-
-
-
-typedef struct {
-	RMC_Data rmc;        // Recommended Minimum Navigation Information
-	bool has_rmc;        // Flag indicating if RMC data is available
 } AllGPSData;
 
 extern AllGPSData ALLGNSSDATA;       // Global instance holding all GNSS data

@@ -44,54 +44,38 @@ int split_fields(char *line, char *fields[], int max_fields) {
  *
  * @return true if parsing was successful, false otherwise.
  */
-bool parse_GNRMC(const char *buffer, RMC_Data *r) {
-	const char *line = strstr(buffer, "$GNRMC");
-	if (!line) return false;
-
-	char copy[NMEA_BUFFER_SIZE];
-	strncpy(copy, line, sizeof(copy) - 1);
-	copy[sizeof(copy) - 1] = '\0';
+void parse_GNRMC() {
 
 	char *fields[15] = {0};
-	int count = split_fields(copy, fields, 15);
-	if (count < 10) return false;
+	int count = split_fields(buffer, fields, 15);
+	if (count < 10) return;
 
 	// Parse time hhmmss
 	if (fields[1] && strlen(fields[1]) >= 6) {
-		r->hour   = (fields[1][0] - '0') * 10 + (fields[1][1] - '0');
-		r->minute = (fields[1][2] - '0') * 10 + (fields[1][3] - '0');
-		r->second = (fields[1][4] - '0') * 10 + (fields[1][5] - '0');
+		ALLGNSSDATA.hour   = (fields[1][0] - '0') * 10 + (fields[1][1] - '0');
+		ALLGNSSDATA.minute = (fields[1][2] - '0') * 10 + (fields[1][3] - '0');
+		ALLGNSSDATA.second = (fields[1][4] - '0') * 10 + (fields[1][5] - '0');
 		} else {
-		r->hour = r->minute = r->second = 0;
+		ALLGNSSDATA.hour = ALLGNSSDATA.minute = ALLGNSSDATA.second = 0;
 	}
 
 	// Parse date ddmmyy
 	if (fields[9] && strlen(fields[9]) == 6) {
-		r->day   = (fields[9][0] - '0') * 10 + (fields[9][1] - '0');
-		r->month = (fields[9][2] - '0') * 10 + (fields[9][3] - '0');
-		r->year  = (fields[9][4] - '0') * 10 + (fields[9][5] - '0');
+		ALLGNSSDATA.day   = (fields[9][0] - '0') * 10 + (fields[9][1] - '0');
+		ALLGNSSDATA.month = (fields[9][2] - '0') * 10 + (fields[9][3] - '0');
+		ALLGNSSDATA.year  = (fields[9][4] - '0') * 10 + (fields[9][5] - '0');
 		} else {
-		r->day = r->month = r->year = 0;
+		ALLGNSSDATA.day = ALLGNSSDATA.month = ALLGNSSDATA.year = 0;
 	}
-
-	return true;
 }
 
 
-void display_gps_date_and_time(void) {
-	memset(&ALLGNSSDATA.rmc, 0, sizeof(ALLGNSSDATA.rmc));
-	if (strstr(buffer, "$GNRMC") && parse_GNRMC(buffer, &ALLGNSSDATA.rmc)) {
-		ALLGNSSDATA.has_rmc = true;
-	}
-	screen_write_formatted_text(0, ALIGN_LEFT, WHITE, BLACK,
-	"Laikas: %02u:%02u:%02u\n"
+void display_gps_date_and_time() {
+	screen_write_formatted_text(0, ALIGN_CENTER, WHITE, BLACK,
 	"Data: %04u-%02u-%02u",
-	ALLGNSSDATA.rmc.hour,
-	ALLGNSSDATA.rmc.minute,
-	ALLGNSSDATA.rmc.second,
-	((uint16_t)ALLGNSSDATA.rmc.year) + 2000,
-	ALLGNSSDATA.rmc.month,
-	ALLGNSSDATA.rmc.day);
+	((uint16_t)ALLGNSSDATA.year) + 2000,
+	ALLGNSSDATA.month,
+	ALLGNSSDATA.day);
 
 }
 
@@ -103,7 +87,7 @@ void display_gps_date_and_time(void) {
  *
  * @note Uses a blocking read approach with `USART0_readChar()`.
  */
-void BK280_Data_Read(void) {
+void BK280_Data_Read() {
 	uint16_t index = 0;
 	bool capturing = false;
 	static const char target[] = "$GNRMC";
@@ -135,6 +119,8 @@ void BK280_Data_Read(void) {
 		// NMEA eilutë baigiasi \r\n
 		if (c == '\n' && index >= 2 && buffer[index - 2] == '\r') {
 			buffer[index] = '\0';
+			parse_GNRMC();
+			//display_gps_date_and_time();
 			break;
 		}
 
@@ -144,5 +130,13 @@ void BK280_Data_Read(void) {
 			break;
 		}
 	}
+}
+
+uint8_t gnss_check() {
+	BK280_Data_Read();
+	if (ALLGNSSDATA.second != 0) {
+		return 0; // animacija baigta
+	}
+	return 1; // animacija tæsiama
 }
 

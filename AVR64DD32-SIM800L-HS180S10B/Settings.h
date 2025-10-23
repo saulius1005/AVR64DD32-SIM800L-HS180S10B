@@ -146,6 +146,10 @@ void lcd_init();
 
 void lcd_fill_color(uint16_t color);
 
+void st7735_draw_pixel(uint16_t x, uint16_t y, uint16_t color);
+
+void st7735_fill_circle(uint8_t x0, uint8_t y0, uint8_t radius, uint16_t color);
+
 void st7735_draw_text(int x, int y, const char *str, uint16_t fg, uint16_t bg);
 
 void st7735_draw_text_wrap(int x, int y, const char *str, uint16_t fg, uint16_t bg);
@@ -166,12 +170,24 @@ void RTC_ON(uint16_t period_ms);
 
 void RTC_OFF();
 
-void SIM800LUARTReceiver2(bool onlyRead, char* command, uint16_t answer_time_ms);
+void SIM800LUARTReceiver2(char* command, uint16_t answer_time_ms);
 
-void display_gps_date_and_time(void);
+void SIM800LUARTReceiver3(uint16_t answer_time_ms);
+
+void display_gps_date_and_time();
 
 void BK280_Data_Read();
 
 uint8_t calculate_start_pixel(char *text, alignment_t alignment);
+
+void gnss_search_animation();
+
+typedef uint8_t (*AnimationCheckFunc)();
+
+void generic_animation(AnimationCheckFunc check_func, const char* running_text, const char* finished_text);
+
+uint8_t gnss_check();
+
+uint8_t sim800l_check();
 
 #endif /* SETTINGS_H_ */

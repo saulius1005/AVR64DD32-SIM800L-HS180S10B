@@ -239,6 +239,16 @@ void st7735_draw_pixel(uint16_t x, uint16_t y, uint16_t color) {
 	CS_HIGH();    // Iðjungiam LCD
 }
 
+void st7735_fill_circle(uint8_t x0, uint8_t y0, uint8_t radius, uint16_t color) {
+	for (int16_t y = -radius; y <= radius; y++) {
+		for (int16_t x = -radius; x <= radius; x++) {
+			if (x * x + y * y <= radius * radius) {
+				st7735_draw_pixel(x0 + x, y0 + y, color);
+			}
+		}
+	}
+}
+
 
 void st7735_draw_char(int x, int y, char c, uint16_t fg, uint16_t bg) {
 	if (c < 32 || c > 127) c = '?';

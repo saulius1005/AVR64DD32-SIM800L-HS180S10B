@@ -156,6 +156,12 @@
     <Compile Include="GPIO.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="LoadAnimation.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="LoadAnimation.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>

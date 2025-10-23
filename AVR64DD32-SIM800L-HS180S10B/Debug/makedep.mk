@@ -8,6 +8,8 @@ CLK.c
 
 GPIO.c
 
+LoadAnimation.c
+
 main.c
 
 RS485LED.c

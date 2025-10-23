@@ -18,22 +18,24 @@ int main()
 	
 	//USART_printf(1, "ATE0&W\r\n");
 
-	SIM800LUARTReceiver2(1, "", 10000); //15sekundþiu laukia ijungimo þinuèiø
+//gnss_search_animation();
+//SIM800LUARTReceiver3(10000); //15sekundþiu laukia ijungimo þinuèiø
+generic_animation(sim800l_check, "Checking SIM...", "SIM Prepared!");
+generic_animation(gnss_check, "Searching GNSS...", "GNSS Locked!");
+
+
 //HTTP alive
-SIM800LUARTReceiver2(0, "AT\n",100);
-SIM800LUARTReceiver2(0, "AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\n", 100);
-SIM800LUARTReceiver2(0, "AT+SAPBR=3,1,\"APN\",\"internet.tele2.lt\"\n", 300);
-SIM800LUARTReceiver2(0, "AT+SAPBR=1,1\n", 1500); // aktyvuojam GPRS
-SIM800LUARTReceiver2(0, "AT+HTTPINIT\n", 180); // inicializuojam HTTP moduli
-SIM800LUARTReceiver2(0, "AT+HTTPPARA=\"CID\",1\n", 100); // nustatom GPRS kanalà
+SIM800LUARTReceiver2("AT\n",100);
+SIM800LUARTReceiver2("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\n", 100);
+SIM800LUARTReceiver2("AT+SAPBR=3,1,\"APN\",\"internet.tele2.lt\"\n", 300);
+SIM800LUARTReceiver2("AT+SAPBR=1,1\n", 1500); // aktyvuojam GPRS
+SIM800LUARTReceiver2("AT+HTTPINIT\n", 180); // inicializuojam HTTP moduli
+SIM800LUARTReceiver2( "AT+HTTPPARA=\"CID\",1\n", 100); // nustatom GPRS kanalà
 
 	while (1)
 	{	
-		//lcd_fill_color(BLACK);
-		BK280_Data_Read();
-		display_gps_date_and_time();
-		SIM800LUARTReceiver2(0, "AT+HTTPPARA=\"URL\",\"http://yoururl.com/index.php?data=[59880E9510A01240A41B108ED29040108F2]\"\n", 500);
-		SIM800LUARTReceiver2(0, "AT+HTTPACTION=0\n", 10000);
+		SIM800LUARTReceiver2("AT+HTTPPARA=\"URL\",\"http://yoururl.com/index.php?data=[59880E9510A01240A41B108ED29040108F2]\"\n", 500);
+		SIM800LUARTReceiver2("AT+HTTPACTION=0\n", 10000);
 
 		_delay_ms(24000); //30sek delay in total more less
 	}

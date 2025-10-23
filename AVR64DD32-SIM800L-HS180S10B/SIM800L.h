@@ -24,6 +24,7 @@ typedef struct {
 	bool lost_connecton_fault;
 	uint8_t faultcount;
 	char FreshDataPack[MESSAGE_LENGTH_SIM800L];
+	bool ready;
 } SIM800Ldata;
 
 extern SIM800Ldata SIM800L;
