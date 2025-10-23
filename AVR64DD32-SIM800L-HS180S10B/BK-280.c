@@ -44,39 +44,54 @@ int split_fields(char *line, char *fields[], int max_fields) {
  *
  * @return true if parsing was successful, false otherwise.
  */
-bool parse_GNRMC(const char *buffer, RMC_Data *r) {// only time and date
+bool parse_GNRMC(const char *buffer, RMC_Data *r) {
 	const char *line = strstr(buffer, "$GNRMC");
 	if (!line) return false;
+
 	char copy[NMEA_BUFFER_SIZE];
 	strncpy(copy, line, sizeof(copy) - 1);
 	copy[sizeof(copy) - 1] = '\0';
+
 	char *fields[15] = {0};
 	int count = split_fields(copy, fields, 15);
 	if (count < 10) return false;
+
+	// Parse time hhmmss
 	if (fields[1] && strlen(fields[1]) >= 6) {
-		snprintf(r->utc, sizeof(r->utc), "%c%c:%c%c:%c%c",
-		fields[1][0], fields[1][1],
-		fields[1][2], fields[1][3],
-		fields[1][4], fields[1][5]);
+		r->hour   = (fields[1][0] - '0') * 10 + (fields[1][1] - '0');
+		r->minute = (fields[1][2] - '0') * 10 + (fields[1][3] - '0');
+		r->second = (fields[1][4] - '0') * 10 + (fields[1][5] - '0');
 		} else {
-		strcpy(r->utc, "00:00:00");
+		r->hour = r->minute = r->second = 0;
 	}
-	if (fields[9]) strncpy(r->date, fields[9], sizeof(r->date));
-	else r->date[0] = '\0';
+
+	// Parse date ddmmyy
+	if (fields[9] && strlen(fields[9]) == 6) {
+		r->day   = (fields[9][0] - '0') * 10 + (fields[9][1] - '0');
+		r->month = (fields[9][2] - '0') * 10 + (fields[9][3] - '0');
+		r->year  = (fields[9][4] - '0') * 10 + (fields[9][5] - '0');
+		} else {
+		r->day = r->month = r->year = 0;
+	}
+
 	return true;
 }
 
 
-void display_gps_date_and_time(AllGPSData *data) {
-
-	memset(data, 0, sizeof(AllGPSData));
-	if (strstr(buffer, "$GNRMC") && parse_GNRMC(buffer, &data->rmc)) {
-		data->has_rmc = true;
+void display_gps_date_and_time(void) {
+	memset(&ALLGNSSDATA.rmc, 0, sizeof(ALLGNSSDATA.rmc));
+	if (strstr(buffer, "$GNRMC") && parse_GNRMC(buffer, &ALLGNSSDATA.rmc)) {
+		ALLGNSSDATA.has_rmc = true;
 	}
-	st7735_draw_text(0, 16 ,"laikas:", GREEN, BLACK);
-	st7735_draw_text(48, 16 ,data->rmc.date, GREEN, BLACK);
-	st7735_draw_text(0, 24 ,"data:", GREEN, BLACK);
-	st7735_draw_text(48, 24 ,data->rmc.utc, GREEN, BLACK);
+	screen_write_formatted_text(0, ALIGN_LEFT, WHITE, BLACK,
+	"Laikas: %02u:%02u:%02u\n"
+	"Data: %04u-%02u-%02u",
+	ALLGNSSDATA.rmc.hour,
+	ALLGNSSDATA.rmc.minute,
+	ALLGNSSDATA.rmc.second,
+	((uint16_t)ALLGNSSDATA.rmc.year) + 2000,
+	ALLGNSSDATA.rmc.month,
+	ALLGNSSDATA.rmc.day);
 
 }
 

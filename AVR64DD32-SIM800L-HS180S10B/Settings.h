@@ -124,6 +124,8 @@ void USART1_init();
 
 char USART1_readChar();
 
+char USART1_readCharRTC();
+
 void USART1_sendString(char *str);
 
 void USART_printf(uint8_t usart_number, const char *format, ...);
@@ -148,10 +150,28 @@ void st7735_draw_text(int x, int y, const char *str, uint16_t fg, uint16_t bg);
 
 void st7735_draw_text_wrap(int x, int y, const char *str, uint16_t fg, uint16_t bg);
 
+void screen_write_text(char *text, uint8_t line, uint8_t start_pixel, uint16_t fg, uint16_t bg);
+
+void screen_write_text_wrapped(uint8_t start_line, alignment_t alignment, uint16_t fg, uint16_t bg, const char *text);
+
+void screen_write_text_aligned(char *text, uint8_t line, alignment_t alignment, uint16_t fg, uint16_t bg);
+
+void screen_write_formatted_text(uint8_t line, alignment_t alignment, uint16_t fg, uint16_t bg, const char *format, ...);
+
+void screen_write_coloured_text_autoscroll(uint8_t line, alignment_t alignment, uint16_t bg, const char * const *str_parts, const uint16_t *fg_colors, size_t num_parts);
+
 void SIM800LUARTReceiver();
 
-void display_gps_date_and_time(AllGPSData *data);
+void RTC_ON(uint16_t period_ms);
+
+void RTC_OFF();
+
+void SIM800LUARTReceiver2(bool onlyRead, char* command, uint16_t answer_time_ms);
+
+void display_gps_date_and_time(void);
 
 void BK280_Data_Read();
+
+uint8_t calculate_start_pixel(char *text, alignment_t alignment);
 
 #endif /* SETTINGS_H_ */

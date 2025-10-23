@@ -13,9 +13,12 @@
 #define MAX_SATELLITES 64
 
 typedef struct {
-	char utc[11];          // UTC time in HH:MM:SS format
-
-	char date[9];          // Date in DDMMYY format
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year; // tik paskutiniai du skaitmenys, pvz. 23 -> 2023
 } RMC_Data;
 
 

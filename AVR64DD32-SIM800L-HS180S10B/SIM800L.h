@@ -14,7 +14,7 @@
 #define CountForError_FO 3
 #define Angle_Precizion 100 // 100 meaning exp. 360 degree 10 3600 (360,0), 1 36000 (360,00)
 #define U_I_Precizion 1 // 10 meaning 24, 1 240 (24.0)
-#define MESSAGE_LENGTH_SIM800L 25
+#define MESSAGE_LENGTH_SIM800L 100
 
 
 typedef struct {

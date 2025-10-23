@@ -148,6 +148,15 @@ char USART1_readChar() {
 	return USART1.RXDATAL; // Return received character
 }
 
+char USART1_readCharRTC() {
+	USART1.STATUS = USART_RXCIF_bm; // Clear buffer before reading
+	while (!(USART1.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
+		if (RTC.INTFLAGS&RTC_OVF_bm) //If time out
+			break; //just exit from this while cycle no reading any longer
+	}
+	return USART1.RXDATAL; // Return received character
+}
+
 /**
  * @brief Sends a formatted string via the selected USART.
  * 

@@ -230,13 +230,6 @@ void lcd_fill_color(uint16_t color) {
 	CS_HIGH();
 }
 
-/**
- * @brief Draw a single pixel on the screen.
- * 
- * @param x X coordinate (0..ST7735_WIDTH-1).
- * @param y Y coordinate (0..ST7735_HEIGHT-1).
- * @param color 16-bit RGB565 color.
- */
 void st7735_draw_pixel(uint16_t x, uint16_t y, uint16_t color) {
 	if (x >= ST7735_WIDTH || y >= ST7735_HEIGHT) return;
 	lcd_set_address(x, y, x, y);
@@ -246,15 +239,6 @@ void st7735_draw_pixel(uint16_t x, uint16_t y, uint16_t color) {
 	CS_HIGH();    // Iðjungiam LCD
 }
 
-/**
- * @brief Draw a single character from 5x7 font.
- * 
- * @param x Top-left X coordinate.
- * @param y Top-left Y coordinate.
- * @param c Character to draw.
- * @param fg Foreground color (RGB565).
- * @param bg Background color (RGB565).
- */
 
 void st7735_draw_char(int x, int y, char c, uint16_t fg, uint16_t bg) {
 	if (c < 32 || c > 127) c = '?';
@@ -269,15 +253,7 @@ void st7735_draw_char(int x, int y, char c, uint16_t fg, uint16_t bg) {
 	}
 }
 
-/**
- * @brief Draw a text string using 5x7 font.
- * 
- * @param x Starting X coordinate.
- * @param y Starting Y coordinate.
- * @param str Null-terminated string to draw.
- * @param fg Foreground color (RGB565).
- * @param bg Background color (RGB565).
- */
+
 void st7735_draw_text(int x, int y, const char *str, uint16_t fg, uint16_t bg) {
 	while (*str) {
 		st7735_draw_char(x, y, *str++, fg, bg);
@@ -285,72 +261,7 @@ void st7735_draw_text(int x, int y, const char *str, uint16_t fg, uint16_t bg) {
 	}
 }
 
-/**
- * @brief Calculates the starting pixel based on text alignment.
- * 
- * This function calculates the starting pixel for the text based on the chosen 
- * alignment (left, center, right).
- * 
- * @param text A pointer to the text string.
- * @param max_length The maximum number of characters.
- * @param alignment The desired text alignment (left, center, right).
- * 
- * @return The starting pixel for the text.
- */
-uint8_t calculate_start_pixel(char *text, /*uint8_t max_length,*/ alignment_t alignment) {
-    uint8_t text_length = 0;
-    while (text[text_length] != '\0' /*&& text_length < max_length*/) {
-        text_length++;
-    }
-
-    uint8_t text_width = text_length * 6;  ///< Calculate the width of the text in pixels
-    switch (alignment) {
-        case ALIGN_CENTER:
-            return (128 - text_width) / 2;  ///< Center the text
-        case ALIGN_RIGHT:
-            return (128 - text_width);  ///< Right-align the text
-        case ALIGN_LEFT:
-        default:
-            return 0;  ///< Left-align the text
-    }
-}
-
-/**
- * @brief Writes a string of text with alignment on the ST7567S display.
- * 
- * This function writes the text to a specific line, adjusting for alignment (left, 
- * center, or right).
- * 
- * @param text A pointer to the text string to write.
- * @param line The line (page) where the text will be written.
- * @param alignment The desired text alignment (left, center, right).
- */
-void screen_write_text_aligned(char *text, uint8_t line, alignment_t alignment) {
-    uint8_t start_pixel = calculate_start_pixel(text, alignment);  ///< Calculate start pixel
-   //screen_write_text(text, line, start_pixel);
-}
-
-/**
- * @brief Writes formatted text with alignment to the ST7567S display.
- * 
- * This function formats the text using the specified format string and arguments 
- * and then writes the formatted text to the display with the chosen alignment.
- * 
- * @param format The format string for the text.
- * @param line The line (page) where the text will be written.
- * @param alignment The desired text alignment (left, center, right).
- */
-void screen_write_formatted_text(const char *format, uint8_t line, alignment_t alignment, ...) {
-    char textStorage[MAX_TEXT_LENGTH];  ///< Buffer for storing formatted text
-    va_list args;  ///< Variable argument list
-
-    va_start(args, alignment);  ///< Start reading variable arguments
-    vsnprintf(textStorage, MAX_TEXT_LENGTH, format, args);  ///< Format the text
-    va_end(args);  ///< End reading variable arguments
-
-    screen_write_text_aligned(textStorage, line, alignment);  ///< Write formatted text to display
-}
-
+/*
 void st7735_draw_text_wrap(int x, int y, const char *str, uint16_t fg, uint16_t bg) {
 	int start_x = x;                        // Pradinë eilutës x reikðmë
 	const int char_width = 6;               // 5 px simbolis + 1 px tarpas
@@ -383,4 +294,238 @@ void st7735_draw_text_wrap(int x, int y, const char *str, uint16_t fg, uint16_t 
 
 		str++;
 	}
+}*/
+
+uint8_t calculate_start_pixel(char *text, alignment_t alignment) {
+    uint8_t text_length = 0;
+    while (text[text_length] != '\0') {
+        text_length++;
+    }
+
+    uint8_t text_width = text_length * 6;  ///< Calculate the width of the text in pixels
+    switch (alignment) {
+        case ALIGN_CENTER:
+            return (128 - text_width) / 2;  ///< Center the text
+        case ALIGN_RIGHT:
+            return (128 - text_width);  ///< Right-align the text
+        case ALIGN_LEFT:
+        default:
+            return 0;  ///< Left-align the text
+    }
 }
+
+void screen_write_text(char *text, uint8_t line, uint8_t start_pixel, uint16_t fg, uint16_t bg) {
+	int x = start_pixel;
+	int y = line * 8;
+
+	while (*text) {
+		if (*text == '\n') {
+			y += 8;       // nauja eilutë
+			x = start_pixel;
+
+			// Nuvalome horizontalià linijà naujai eilutei
+			for (int i = 0; i < 128; i++) {
+				for (int j = 0; j < 8; j++) {
+					st7735_draw_pixel(i, y + j, bg);
+				}
+			}
+			} else {
+			// Pirmiausia uþpildome simbolio plotà fono spalva
+			for (int j = 0; j < 7; j++) {
+				for (int i = 0; i < 5; i++) {
+					st7735_draw_pixel(x + i, y + j, bg);
+				}
+			}
+
+			st7735_draw_char(x, y, *text, fg, bg);
+			x += 6;
+		}
+		text++;
+	}
+}
+
+void screen_write_text_aligned(char *text, uint8_t line, alignment_t alignment, uint16_t fg, uint16_t bg) {
+	uint8_t start_pixel = calculate_start_pixel(text, alignment);  ///< Calculate start pixel
+	screen_write_text(text, line, start_pixel, fg, bg);             ///< Draw text with colors
+}
+
+void screen_write_text_wrapped(uint8_t start_line, alignment_t alignment, uint16_t fg, uint16_t bg, const char *text) {
+	uint8_t line = start_line;
+	size_t pos = 0;
+	size_t len = strlen(text);
+
+	while (pos < len && line < MAX_TEXT_LENGTH_VERTICAL) {
+		// Suskaièiuojame eilutës ilgá
+		size_t remaining = len - pos;
+		size_t line_len = (remaining > MAX_TEXT_LENGTH_HORIZONTAL) ? MAX_TEXT_LENGTH_HORIZONTAL : remaining;
+
+		// Ieðkome \n
+		size_t newline_pos = line_len;
+		for (size_t i = 0; i < line_len; i++) {
+			if (text[pos + i] == '\n') {
+				newline_pos = i;
+				break;
+			}
+		}
+
+		char buffer[MAX_TEXT_LENGTH_HORIZONTAL + 1];
+		strncpy(buffer, &text[pos], newline_pos);
+		buffer[newline_pos] = '\0';
+
+		// Apskaièiuojame start_pixel pagal lygiavimà
+		uint8_t start_pixel = calculate_start_pixel(buffer, alignment);
+
+		// Pieðiame simbolius eilutëje, st7735_draw_char jau pieðia fono spalvà
+		int x = start_pixel;
+		int y = line * 8;
+		for (size_t i = 0; i < strlen(buffer); i++) {
+			st7735_draw_char(x, y, buffer[i], fg, bg);
+			x += 6; // 5 px simbolio plotis + 1 px tarpas
+		}
+
+		pos += newline_pos;
+
+		// Praleidþiame \n, jei buvo
+		if (pos < len && text[pos] == '\n') pos++;
+
+		line++;
+	}
+}
+
+
+void screen_write_formatted_text(uint8_t start_line, alignment_t alignment, uint16_t fg, uint16_t bg, const char *format, ...) {
+	char textStorage[MAX_TEXT_LENGTH_HORIZONTAL * MAX_TEXT_LENGTH_VERTICAL];  ///< Buffer for storing formatted text
+	va_list args;
+
+	va_start(args, format);                                        ///< Start reading variable arguments
+	vsnprintf(textStorage, sizeof(textStorage), format, args);    ///< Format the text
+	va_end(args);                                                  ///< End reading variable arguments
+
+	screen_write_text_wrapped(start_line, alignment, fg, bg, textStorage);  ///< Write wrapped/cut text
+}
+
+/// Teksto bufferis ekrano linijoms nuo TEXT_BUFFER_START_LINE iki MAX_TEXT_LENGTH_VERTICAL
+ColouredChar screenBuffer[MAX_TEXT_LENGTH_VERTICAL - TEXT_BUFFER_START_LINE][MAX_TEXT_LENGTH_HORIZONTAL + 1] = {{{0}}};
+uint8_t bufferLinesUsed = 0;  // Kiek eiluèiø ðiuo metu uþimta bufferio
+
+void redraw_screen_buffer(uint8_t start_line, uint16_t bg, alignment_t alignment) {
+	for (uint8_t i = 0; i < bufferLinesUsed; i++) {
+		uint8_t y = (start_line + i) * 8;
+	
+		ColouredChar *current_line = screenBuffer[i];
+	
+		// Konvertuojame ColouredChar eilutæ á char* tekstà, kad apskaièiuotume lygiavimà
+		char temp_text_buffer[MAX_TEXT_LENGTH_HORIZONTAL + 1];
+		size_t len = 0;
+		for (size_t k = 0; k < MAX_TEXT_LENGTH_HORIZONTAL; k++) {
+			if (current_line[k].character == '\0') break;
+			temp_text_buffer[k] = current_line[k].character;
+			len++;
+		}
+		temp_text_buffer[len] = '\0';
+	
+		uint8_t start_pixel = calculate_start_pixel(temp_text_buffer, alignment);
+		int x = start_pixel;
+
+		// 1. **Visos linijos valymas (8 px aukðèio)** su bendra BG spalva
+		for (int py = 0; py < 8; py++) {
+			for (int px = 0; px < ST7735_WIDTH; px++) {
+				st7735_draw_pixel(px, y + py, bg);
+			}
+		}
+	
+		// 2. TEKSTO PIEÐIMAS (NAUDOJANT JÛSØ LOGIKÀ IÐ screen_write_text_wrapped)
+		for (size_t j = 0; j < len; j++) {
+			uint16_t current_fg = current_line[j].fg_color;
+		
+			// Jûsø patikrinta pieðimo funkcija:
+			st7735_draw_char(x, y, current_line[j].character, current_fg, bg);
+			x += 6; // 5 px simbolio plotis + 1 px tarpas
+		}
+	}
+	// Valymas likusiai bufferio daliai
+	for (uint8_t i = bufferLinesUsed; i < (MAX_TEXT_LENGTH_VERTICAL - start_line); i++) {
+		uint8_t y = (start_line + i) * 8;
+		for (int py = 0; py < 8; py++) {
+			for (int px = 0; px < ST7735_WIDTH; px++) {
+				st7735_draw_pixel(px, y + py, bg);
+			}
+		}
+	}
+}
+
+
+void screen_write_coloured_text_autoscroll(uint8_t start_line, alignment_t alignment, uint16_t bg, const char * const *str_parts, const uint16_t *fg_colors, size_t num_parts) {
+	
+	uint8_t max_buffer_lines = MAX_TEXT_LENGTH_VERTICAL - start_line;
+	
+	// Laikinas buferio masyvas naujai informacijai
+	ColouredChar tempLine[MAX_TEXT_LENGTH_HORIZONTAL + 1] = {0};
+	size_t temp_len = 0;
+
+	for (size_t part_idx = 0; part_idx < num_parts; part_idx++) {
+		const char *part = str_parts[part_idx];
+		uint16_t color = fg_colors[part_idx];
+		
+		for (size_t char_idx = 0; part[char_idx] != '\0'; char_idx++) {
+			char c = part[char_idx];
+			
+			// 1. Naujos eilutës apdorojimas (PAGRINDINIS PATAISYMAS)
+			if (c == '\n' || temp_len >= MAX_TEXT_LENGTH_HORIZONTAL) {
+				// Eilutë baigësi (dël \n arba per didelio ilgio)
+				
+				// Prieð ádedant á buferá, uþtikriname, kad tempLine bûtø null-terminuotas (simbolio atþvilgiu)
+				tempLine[temp_len].character = '\0';
+				
+				// 1a. Scrolinimo logika
+				if (bufferLinesUsed >= max_buffer_lines) {
+					// Stumiame senas eilutes aukðtyn
+					for (uint8_t i = 1; i < bufferLinesUsed; i++) {
+						// Naudojame atminties kopijavimà, nes elementas yra struktûra
+						memcpy(screenBuffer[i - 1], screenBuffer[i], sizeof(screenBuffer[0]));
+					}
+					// Ádedam naujà eilutæ á paskutinæ vietà
+					memcpy(screenBuffer[bufferLinesUsed - 1], tempLine, sizeof(tempLine));
+					} else {
+					// Ádedam á laisvà vietà
+					memcpy(screenBuffer[bufferLinesUsed], tempLine, sizeof(tempLine));
+					bufferLinesUsed++;
+				}
+
+				// 1b. Atstatome laikinà eilutæ naujai pradþiai
+				memset(tempLine, 0, sizeof(tempLine));
+				temp_len = 0;
+				
+				// Jei nauja eilutë prasidëjo dël \n, praleidþiame kità apdorojimà ðiam simboliui
+				if (c == '\n') {
+					continue;
+				}
+			}
+			
+			// 2. Simbolio pridëjimas prie laikinosios eilutës
+			tempLine[temp_len].character = c;
+			tempLine[temp_len].fg_color = color;
+			temp_len++;
+		}
+	}
+
+	// 3. Apdorojame paskutinæ likusià eilutæ (jei ji nebuvo baigta su \n)
+	if (temp_len > 0) {
+		tempLine[temp_len].character = '\0';
+
+		if (bufferLinesUsed >= max_buffer_lines) {
+			for (uint8_t i = 1; i < bufferLinesUsed; i++) {
+				memcpy(screenBuffer[i - 1], screenBuffer[i], sizeof(screenBuffer[0]));
+			}
+			memcpy(screenBuffer[bufferLinesUsed - 1], tempLine, sizeof(tempLine));
+			} else {
+			memcpy(screenBuffer[bufferLinesUsed], tempLine, sizeof(tempLine));
+			bufferLinesUsed++;
+		}
+	}
+	
+	// 4. Perpieðiame visà bufferá
+	redraw_screen_buffer(start_line, bg, alignment);
+}
+
+

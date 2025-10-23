@@ -43,6 +43,7 @@ C_SRCS +=  \
 ../main.c \
 ../RS485LED.c \
 ../RS485USART.c \
+../RTC.c \
 ../SIM800L.c \
 ../SPI.c \
 ../ST7735.c \
@@ -62,6 +63,7 @@ GPIO.o \
 main.o \
 RS485LED.o \
 RS485USART.o \
+RTC.o \
 SIM800L.o \
 SPI.o \
 ST7735.o \
@@ -74,6 +76,7 @@ GPIO.o \
 main.o \
 RS485LED.o \
 RS485USART.o \
+RTC.o \
 SIM800L.o \
 SPI.o \
 ST7735.o \
@@ -86,6 +89,7 @@ GPIO.d \
 main.d \
 RS485LED.d \
 RS485USART.d \
+RTC.d \
 SIM800L.d \
 SPI.d \
 ST7735.d \
@@ -98,6 +102,7 @@ GPIO.d \
 main.d \
 RS485LED.d \
 RS485USART.d \
+RTC.d \
 SIM800L.d \
 SPI.d \
 ST7735.d \
@@ -159,6 +164,13 @@ LINKER_SCRIPT_DEP+=
 	@echo Finished building: $<
 	
 
+./RTC.o: .././RTC.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=avr64dd32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\gcc\dev\avr64dd32" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 ./SIM800L.o: .././SIM800L.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
@@ -213,7 +225,7 @@ all: $(OUTPUT_FILE_PATH) $(ADDITIONAL_DEPENDENCIES)
 $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER_SCRIPT_DEP)
 	@echo Building target: $@
 	@echo Invoking: AVR/GNU Linker : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="AVR64DD32-SIM800L-HS180S10B.map" -Wl,-u,vfprintf -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=avr64dd32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\gcc\dev\avr64dd32"  
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="AVR64DD32-SIM800L-HS180S10B.map" -Wl,-u,vfprintf -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=avr64dd32 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\Atmel\AVR-Dx_DFP\2.7.321\gcc\dev\avr64dd32" -lprintf_flt  
 	@echo Finished building target: $@
 	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "AVR64DD32-SIM800L-HS180S10B.elf" "AVR64DD32-SIM800L-HS180S10B.hex"
 	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "AVR64DD32-SIM800L-HS180S10B.elf" "AVR64DD32-SIM800L-HS180S10B.eep" || exit 0
