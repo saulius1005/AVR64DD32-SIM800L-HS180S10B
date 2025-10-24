@@ -12,6 +12,8 @@
 #define NMEA_BUFFER_SIZE 60
 #define MAX_SATELLITES 64
 
+#define GMT 3  //(pvz., Lietuva þiemà GMT+2, vasarà GMT+3)
+
 typedef struct {
     uint8_t hour;
     uint8_t minute;

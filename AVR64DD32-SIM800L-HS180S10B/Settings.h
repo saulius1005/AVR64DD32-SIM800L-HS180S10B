@@ -164,13 +164,13 @@ void screen_write_formatted_text(uint8_t line, alignment_t alignment, uint16_t f
 
 void screen_write_coloured_text_autoscroll(uint8_t line, alignment_t alignment, uint16_t bg, const char * const *str_parts, const uint16_t *fg_colors, size_t num_parts);
 
-void SIM800LUARTReceiver();
-
 void RTC_ON(uint16_t period_ms);
 
 void RTC_OFF();
 
-void SIM800LUARTReceiver2(char* command, uint16_t answer_time_ms);
+void SIM800LUARTReceiver();
+
+void SIM800LUARTReceiver2(uint16_t answer_time_ms, const char *format, ...);
 
 void SIM800LUARTReceiver3(uint16_t answer_time_ms);
 
@@ -189,5 +189,7 @@ void generic_animation(AnimationCheckFunc check_func, const char* running_text, 
 uint8_t gnss_check();
 
 uint8_t sim800l_check();
+
+void apply_timezone();
 
 #endif /* SETTINGS_H_ */

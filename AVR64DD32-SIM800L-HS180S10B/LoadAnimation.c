@@ -98,7 +98,7 @@ void generic_animation(AnimationCheckFunc check_func, const char* running_text, 
 	lcd_fill_color(COLOR_BG);
 	screen_write_formatted_text(16, ALIGN_CENTER, RED, COLOR_BG, running_text);
 
-	uint8_t head = 18;
+	uint8_t head = 11;
 
 	while (1) {
 		if (!check_func()) {  // jei callback gràþina 0, baigiame animacijà

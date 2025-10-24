@@ -28,21 +28,41 @@ uint64_t hexToUint64(const char *str) {
 	return result;
 }
 
-void SIM800LDataSplitter(char *command) {
-	screen_write_formatted_text(3, ALIGN_CENTER, GREEN, BLACK,"Atsakymai");
-	screen_write_formatted_text(5, ALIGN_LEFT, GREEN, BLACK,"%s", command);
+
+void SIM800LDataSplitter(char *answer) {
+	const char *ptr = strstr(answer, "+CSQ:");
+	ptr += 5; // praeinam "+CSQ:"
+	while (*ptr == ' ') ptr++; // praleidþiam tarpà
+	int8_t rssi = (int8_t)atoi(ptr);
+	int16_t dbm = 0;
+	if (rssi == 99) 
+		dbm= -999; // neþinoma
+	else
+		dbm= -113 + (rssi * 2);
+	screen_write_formatted_text(1, ALIGN_LEFT, BLUE, BLACK,"rssi: %d dbm: %d", rssi, dbm);
 }
 
 void SIM800LUARTReceiver() {
+	USART_printf(1, "AT+CSQ\n");
+	RTC_ON(100); //start answer waiting timer
 	uint8_t index = 0;
-	char command[MESSAGE_LENGTH_SIM800L]={0}; // Empty command array
-	SIM800L.lost_signal_fault = false;
-	while (!SIM800L.lost_signal_fault) {
-		char c = USART1_readChar(); // Reading a character from USART
-		if(c != '\r') //skip carige return
-			command[index++] = c; // Store received character in command array
+	char answer[MESSAGE_LENGTH_SIM800L] = {0}; // Empty answer array
+
+	while (!(RTC.INTFLAGS & RTC_OVF_bm)) {
+		char c = USART1_readCharRTC(); // Read a character
+
+		// Skip only carriage return
+		if (c != '\r') {
+			if (index < MESSAGE_LENGTH_SIM800L - 1) { // Prevent buffer overflow
+				answer[index++] = c;
+			}
+		}
+		if(c == '\n' && answer[index-2] == '\n')
+		index--;
 	}
-		SIM800LDataSplitter(command); // Execute the received answer //comment when testing lines below
+	RTC.INTFLAGS = RTC_OVF_bm; // Clear RTC overflow flag
+	RTC_OFF();
+	SIM800LDataSplitter(answer);
 }
 
 void SIM800LDataSplitter3(char *answer) {
@@ -135,29 +155,34 @@ void SIM800LDataSplitter2(char *command, char *answer) {
 	//screen_write_formatted_text_autoscroll(3, ALIGN_LEFT, GREEN, BLACK,"CMD: %s\nANSW: %s\n", command, answer);
 }
 
-void SIM800LUARTReceiver2(char* command, uint16_t answer_time_ms) {
-	BK280_Data_Read(); //read gnss
+void SIM800LUARTReceiver2(uint16_t answer_time_ms, const char *format, ...) {
+	char command[128];
+	va_list args;
+	va_start(args, format); 
+	vsnprintf(command, sizeof(command), format, args);
+	va_end(args);
+
+	BK280_Data_Read(); // read GNSS
 	display_gps_date_and_time();
-	USART_printf(1, command); //send command
-	RTC_ON(answer_time_ms); //start answer waiting timer
+
+	USART_printf(1, "%s", command); // send formatted command
+	RTC_ON(answer_time_ms); // start answer waiting timer
+
 	uint8_t index = 0;
-	char answer[MESSAGE_LENGTH_SIM800L] = {0}; // Empty answer array
+	char answer[MESSAGE_LENGTH_SIM800L] = {0};
 
 	while (!(RTC.INTFLAGS & RTC_OVF_bm)) {
-		char c = USART1_readCharRTC(); // Read a character
-
-		// Skip only carriage return
-		if (c != '\r' && c!= '\n') {
-			if (index < MESSAGE_LENGTH_SIM800L - 1) { // Prevent buffer overflow
-				answer[index++] = c;
-			}
+		char c = USART1_readCharRTC();
+		if (c != '\r' && c != '\n') {
+			if (index < MESSAGE_LENGTH_SIM800L - 1)
+			answer[index++] = c;
 		}
 	}
 
-	RTC.INTFLAGS = RTC_OVF_bm; // Clear RTC overflow flag
+	RTC.INTFLAGS = RTC_OVF_bm;
 	RTC_OFF();
 
-	SIM800LDataSplitter2(command, answer); // Process received answer
+	SIM800LDataSplitter2(command, answer); // process received answer
 }
 
 uint8_t sim800l_check() {
