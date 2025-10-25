@@ -81,7 +81,6 @@ void gnss_search_animation() {
 	screen_write_formatted_text(16, ALIGN_CENTER, GREEN, COLOR_BG, "GNSS Locked!");
 }
 
-//typedef uint8_t (*AnimationCheckFunc)();
 
 void generic_animation(AnimationCheckFunc check_func, const char* running_text, const char* finished_text) {
 	const uint8_t centerX = ST7735_WIDTH / 2;

@@ -27,7 +27,22 @@ typedef struct {
 	bool ready;
 } SIM800Ldata;
 
-extern SIM800Ldata SIM800L;
 
+
+// --- Kompaktiðkas „Command-to-text“ lentelinis keitimas ---
+typedef struct {
+	const char *match;
+	const char *replace;
+} CommandReplace_t;
+
+typedef struct {
+	uint16_t code;
+	const char *text;
+} HttpStatus_t;
+
+
+extern SIM800Ldata SIM800L;
+extern HttpStatus_t http_status_table[45];
+extern CommandReplace_t cmd_replace_table[7];
 
 #endif /* SIM800L_H_ */
