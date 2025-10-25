@@ -174,6 +174,8 @@ void SIM800LUARTReceiver2(uint16_t answer_time_ms, const char *format, ...);
 
 void SIM800LUARTReceiver3(uint16_t answer_time_ms);
 
+void HTTP_alive_init();
+
 void display_gps_date_and_time();
 
 void BK280_Data_Read();
@@ -191,5 +193,7 @@ uint8_t gnss_check();
 uint8_t sim800l_check();
 
 void apply_timezone();
+
+void intData_to_hexChar();
 
 #endif /* SETTINGS_H_ */

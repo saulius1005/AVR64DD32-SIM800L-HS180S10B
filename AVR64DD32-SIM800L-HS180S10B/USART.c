@@ -10,6 +10,7 @@
  */
 
 #include "Settings.h"
+#include "USARTVar.h"
 
 /**
  * @brief Initializes USART0 with a baud rate of 2500000.
@@ -96,7 +97,7 @@ int USART0_printChar(char c, FILE *stream) {
  * transmission and reception at a baud rate of 2.5 Mbps with double-speed operation.
  */
 void USART1_init() {
-	USART1.BAUD = (uint16_t)USART1_BAUD_RATE(115200); // Set baud rate to 460.8 kbps for fiber optic
+	USART1.BAUD = (uint16_t)USART1_BAUD_RATE(460800); // Set baud rate to 460.8 kbps for fiber optic
 	USART1.CTRLB = USART_RXEN_bm | USART_TXEN_bm  | USART_RXMODE_CLK2X_gc; // Enable RX, TX, double speed mode
 	USART1.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc; // Configure for 8-bit, no parity, 1 stop bit, asynchronous mode
 }
@@ -181,4 +182,22 @@ void USART_printf(uint8_t usart_number, const char *format, ...) {
 	} else {
 		// Handle invalid USART number – add error management if needed
 	}
+}
+
+void intData_to_hexChar(){
+	sprintf(RS485data.dataBuffer,
+	"%04X%04X%04X%02X%X%02X%X%03X%04X%03X%03X%04X",
+	RS485data.azimuth,          // 23750 -> 0x5C56
+	RS485data.elevation,        // 1230 -> 0x04CE
+	RS485data.dayTopElevation,  // 5625 -> 0x15E1
+	RS485data.windSpeed,        // 13 -> 0x0D
+	RS485data.winDirection,     // 6 -> 0x6
+	RS485data.firWindSpeed,     // 10 -> 0x0A
+	RS485data.firWindDirection, // 10 -> 0x0A
+	RS485data.sunLevel,         // 495 -> 0x1EF
+	RS485data.sht21T,           // 2100 -> 0x0834
+	RS485data.sht21RH,          // 632 -> 0x278
+	RS485data.bmp280P,          // 1001 -> 0x3E9
+	RS485data.bmp280T           // 2133 -> 0x0855
+	);
 }

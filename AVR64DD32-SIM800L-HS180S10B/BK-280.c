@@ -36,14 +36,7 @@ int split_fields(char *line, char *fields[], int max_fields) {
 	 return count;
  }
 
-/**
- * @brief Parses an NMEA $GNRMC sentence and fills the RMC_Data structure.
- *
- * @param buffer Input NMEA data buffer (string containing multiple sentences).
- * @param r      Pointer to the RMC_Data structure to fill with parsed values.
- *
- * @return true if parsing was successful, false otherwise.
- */
+
 void parse_GNRMC() {
 
 	char *fields[15] = {0};
@@ -79,14 +72,6 @@ void display_gps_date_and_time() {
 
 }
 
-/**
- * @brief Reads GPS data from USART and captures NMEA sentences from $GNRMC to $GNGLL.
- *
- * This function fills the global `buffer` with all NMEA sentences starting from
- * the first detected $GNRMC sentence and ending after a $GNGLL sentence (terminated by CRLF).
- *
- * @note Uses a blocking read approach with `USART0_readChar()`.
- */
 void BK280_Data_Read() {
 	uint16_t index = 0;
 	bool capturing = false;
