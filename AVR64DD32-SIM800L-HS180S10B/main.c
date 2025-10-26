@@ -18,7 +18,7 @@ int main()
 
 	intData_to_hexChar(); //convert data which would be sended to google sheets
 	generic_animation(sim800l_check, "Checking SIM...", "SIM Prepared!");
-	//generic_animation(gnss_check, "Searching GNSS...", "GNSS Locked!");//comment if you don't want to synchronize time. It can took prom couple seconds to half hour. It depends from GNSS signal, sattelites in view and so on
+	generic_animation(gnss_check, "Searching GNSS...", "GNSS Locked!");//comment if you don't want to synchronize time. It can took prom couple seconds to half hour. It depends from GNSS signal, sattelites in view and so on
 	BK280_Data_Read();
 	display_gps_date_and_time();
 	SIM800LUARTReceiver();//reading of signal strength
@@ -28,8 +28,8 @@ int main()
 		BK280_Data_Read();
 		display_gps_date_and_time();
 		SIM800LUARTReceiver();//reading of signal strength
-		SIM800LUARTReceiver2(600, "AT+HTTPPARA=\"URL\",\"%s%s]\"\n", RS485data.url, RS485data.dataBuffer);//send data
-		SIM800LUARTReceiver2(10000, "AT+HTTPACTION=0\n"); //receive data (and waiting answer for 10s from server)
-		_delay_ms(20000); //30sek delay in total more less to limit data transfers
+		SIM800LUARTReceiver2(500, "AT+HTTPPARA=\"URL\",\"%s%s]\"\n", RS485data.url, RS485data.dataBuffer);//send data
+		SIM800LUARTReceiver2(9500, "AT+HTTPACTION=0\n"); //receive data (and waiting answer for 10s from server)
+		//data pack every ~14s
 	}
 }

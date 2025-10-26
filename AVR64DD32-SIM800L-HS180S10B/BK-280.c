@@ -64,8 +64,8 @@ void parse_GNRMC() {
 
 
 void display_gps_date_and_time() {
-	screen_write_formatted_text(0, ALIGN_LEFT, WHITE, BLACK,
-	"Data: %04u-%02u-%02u",
+	screen_write_formatted_text(0, ALIGN_CENTER, WHITE, BLACK,
+	"%04u-%02u-%02u",
 	((uint16_t)ALLGNSSDATA.year) + 2000,
 	ALLGNSSDATA.month,
 	ALLGNSSDATA.day);
@@ -125,78 +125,41 @@ uint8_t gnss_check() {
 	return 1; // animacija tæsiama
 }
 
-// ar metai keliamieji
-static inline bool is_leap(uint8_t year) {
-	uint16_t full_year = 2000 + year;
-	return (full_year % 4 == 0 && (full_year % 100 != 0 || full_year % 400 == 0));
-}
+void apply_timezone(void) {
+	int16_t year = 2000 + ALLGNSSDATA.year;
+	int16_t hour = ALLGNSSDATA.hour;
 
-// kiek dienø turi mënuo
-static uint8_t days_in_month(uint8_t month, uint8_t year) {
-	switch (month) {
-		case 1: case 3: case 5: case 7: case 8: case 10: case 12: return 31;
-		case 4: case 6: case 9: case 11: return 30;
-		case 2: return is_leap(year) ? 29 : 28;
-		default: return 30;
+	bool isDST = false;
+	if (ALLGNSSDATA.month > 3 && ALLGNSSDATA.month < 10) isDST = true;//taikomas vasaros laikas (ES taisyklës)
+	else if (ALLGNSSDATA.month == 3 || ALLGNSSDATA.month == 10) {
+		uint8_t h = (31 + (13 * (ALLGNSSDATA.month + 1)) / 5 + year + (year / 4) - (year / 100) + (year / 400)) % 7;
+		uint8_t lastSunday = 31 - ((h + 6) % 7);
+		isDST = (ALLGNSSDATA.month == 3) ? (ALLGNSSDATA.day >= lastSunday) : (ALLGNSSDATA.day < lastSunday);
 	}
-}
+	int8_t offset = GMT - (isDST ? 0 : 1); // þiemà -1 valanda
+	hour += offset;	
+	bool leap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));//keliamieji metai
 
-// ar ðiuo metu taikomas vasaros laikas (ES: paskutinis kovo – paskutinis spalio sekmadienis)
-static bool is_summer_time(uint8_t day, uint8_t month, uint8_t year) {
-	if (month < 3 || month > 10) return false;
-	if (month > 3 && month < 10) return true;
+	uint8_t dim = (ALLGNSSDATA.month==4||ALLGNSSDATA.month==6||ALLGNSSDATA.month==9||ALLGNSSDATA.month==11)?30:(ALLGNSSDATA.month==2?(leap?29:28):31);//dienø mënesyje
 
-	// Zeller algoritmas (supaprastintas, be papildomø tipø)
-	uint8_t q = day;
-	uint8_t m = (month < 3) ? month + 12 : month;
-	uint16_t Y = (month < 3) ? (2000 + year - 1) : (2000 + year);
-	uint8_t h = (q + (13 * (m + 1)) / 5 + Y + (Y / 4) - (Y / 100) + (Y / 400)) % 7;
-	uint8_t weekday = (h + 6) % 7; // 0=sekmadienis, 1=pirmadienis...
-
-	uint8_t lastSunday = 31 - ((weekday + (31 - day)) % 7);
-
-	if (month == 3)
-	return (day > lastSunday);  // po paskutinio kovo sekmadienio – vasaros laikas
-	else
-	return !(day > lastSunday); // iki paskutinio spalio sekmadienio – vasaros laikas
-}
-
-// pagrindinë funkcija
-void apply_timezone() {
-	int8_t offset = GMT;
-
-	// jei vasaros laikas – pridëti papildomà 1 valandà
-	if (is_summer_time(ALLGNSSDATA.day, ALLGNSSDATA.month, ALLGNSSDATA.year))
-	offset += 1;
-
-	int16_t hour = ALLGNSSDATA.hour + offset;
-
-	// valandø korekcija su dienos/mënesio/metø perëjimais
-	if (hour >= 24) {
+	if (hour >= 24) {//perëjimai tarp dienø/mënesiø/metø
 		hour -= 24;
-		ALLGNSSDATA.day++;
-		if (ALLGNSSDATA.day > days_in_month(ALLGNSSDATA.month, ALLGNSSDATA.year)) {
-			ALLGNSSDATA.day = 1;
-			ALLGNSSDATA.month++;
-			if (ALLGNSSDATA.month > 12) {
-				ALLGNSSDATA.month = 1;
-				ALLGNSSDATA.year++;
-			}
-		}
+		if (++ALLGNSSDATA.day > dim) { ALLGNSSDATA.day = 1; if (++ALLGNSSDATA.month > 12) { ALLGNSSDATA.month = 1; year++; } }
 		} else if (hour < 0) {
 		hour += 24;
-		if (ALLGNSSDATA.day == 1) {
-			if (ALLGNSSDATA.month == 1) {
-				ALLGNSSDATA.month = 12;
-				ALLGNSSDATA.year--;
-				} else {
-				ALLGNSSDATA.month--;
-			}
-			ALLGNSSDATA.day = days_in_month(ALLGNSSDATA.month, ALLGNSSDATA.year);
-			} else {
-			ALLGNSSDATA.day--;
+		if (--ALLGNSSDATA.day == 0) {
+			if (--ALLGNSSDATA.month == 0) { ALLGNSSDATA.month = 12; year--; }
+			leap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+			dim = (ALLGNSSDATA.month==4||ALLGNSSDATA.month==6||ALLGNSSDATA.month==9||ALLGNSSDATA.month==11)?30:(ALLGNSSDATA.month==2?(leap?29:28):31);
+			ALLGNSSDATA.day = dim;
 		}
 	}
 
 	ALLGNSSDATA.hour = (uint8_t)hour;
+	ALLGNSSDATA.day = ALLGNSSDATA.day;
+	ALLGNSSDATA.month = ALLGNSSDATA.month;
+	ALLGNSSDATA.year = (uint8_t)(year - 2000);
 }
+
+
+

@@ -76,21 +76,6 @@ void USART0_sendString(char *str) {
 }
 
 /**
- * @brief Prints a single character to a stream using USART0.
- * 
- * This function is used with the standard output stream (stdout) to send characters to USART0.
- * 
- * @param c The character to print.
- * @param stream The stream to print the character to.
- * @return 0 on success.
- */
-int USART0_printChar(char c, FILE *stream) {
-	USART0_sendChar(c); // Send character
-	return 0;
-}
-
-
-/**
  * @brief Initializes USART1 with a baud rate of 2500000.
  * 
  * This function configures USART1 for asynchronous communication, enabling both
