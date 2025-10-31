@@ -24,8 +24,7 @@ USART.d USART.o: .././USART.c .././Settings.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\float.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdbool.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\pgmspace.h \
- .././RS485LED.h .././RS485USART.h .././ST7735.h .././SIM800L.h \
- .././USART.h .././BK_280.h .././USARTVar.h
+ .././ST7735.h .././SIM800L.h .././USART.h .././BK_280.h .././USARTVar.h
 
 .././Settings.h:
 
@@ -78,10 +77,6 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdbool.h:
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\pgmspace.h:
-
-.././RS485LED.h:
-
-.././RS485USART.h:
 
 .././ST7735.h:
 

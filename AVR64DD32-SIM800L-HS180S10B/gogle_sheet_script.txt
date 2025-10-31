@@ -1,0 +1,49 @@
+function hexToInt16(hexStr) {
+  var value = parseInt(hexStr, 16);
+  if (value > 0x7FFF) value -= 0x10000; // konvertuojam į neigiamą, jei reikia
+  return value;
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Data");
+  var data = e.parameter.data || "[]";
+  var time = new Date();
+  
+  // Išvalom skliaustus
+  var data = (e.parameter.data || "").replace(/[\[\]]/g, "");
+  
+  // Ištraukiame laukus pagal tavo formatą
+  var azimuth       = parseInt(data.substring(0, 4), 16) / 100;   //4 Pvz. 18000 → 180.00°
+  var elevation     = parseInt(data.substring(4, 8), 16) / 100;   //4
+  var elevTop       = parseInt(data.substring(8, 12), 16) / 100;  //4
+  var windSpeed     = parseInt(data.substring(12, 14), 16);       //2
+  var windDir       = parseInt(data.substring(14, 15), 16);       //1
+  var windSpeedFIR  = parseInt(data.substring(15, 17), 16);       //2
+  var windDirFIR    = parseInt(data.substring(17, 18), 16);       //1
+  var sunLevel      = parseInt(data.substring(18, 21), 16);       //3
+  var sht21T        = hexToInt16(data.substring(21, 25)) / 100;   //4
+  var sht21RH       = parseInt(data.substring(25, 28), 16) / 10;  //3
+  var bmp280Pres    = parseInt(data.substring(28, 31),16);        //3
+  var bmp280T       = hexToInt16(data.substring(31, 35)) / 100;   //4
+
+  // Įrašome į stulpelius
+  sheet.appendRow([
+    time,
+    data,
+    azimuth,
+    elevation,
+    elevTop,
+    windSpeed,
+    windSpeedFIR,
+    windDir,
+    windDirFIR,
+    sunLevel,
+    sht21T,
+    bmp280T,
+    sht21RH,
+    bmp280Pres
+
+  ]);
+
+  return ContentService.createTextOutput("OK");
+}

@@ -1,31 +1,48 @@
 /*
  * RTC.c
  *
+ * Real-Time Counter (RTC) configuration and control.
+ *
  * Created: 2025-10-23 13:33:56
- *  Author: Saulius
- */ 
+ * Author: Saulius
+ */
+
 #include "Settings.h"
 
+/*
+ * Enable and configure the RTC with a given period in milliseconds.
+ *
+ * period_ms: desired period in milliseconds
+ */
 void RTC_ON(uint16_t period_ms)
 {
-	while (RTC.STATUS > 0); // sinchronizacijos laukimas
-	RTC.CLKSEL = RTC_CLKSEL_OSC1K_gc; //32768/32=1024khz
+    // Wait until RTC synchronization is complete
+    while (RTC.STATUS > 0);
 
-    // RTC COUNT eina nuo 0 iki PER (kai COUNT == PER -> interrupt)
-    RTC.PER = (uint16_t)(period_ms*1.024)+0.5;  
+    // Select 1 kHz internal oscillator (32768 Hz / 32 = 1024 Hz)
+    RTC.CLKSEL = RTC_CLKSEL_OSC1K_gc;
 
-    // Nustatom pradinæ reikðmæ
+    // Set period register: RTC counts from 0 to PER (interrupt occurs when COUNT == PER)
+    RTC.PER = (uint16_t)(period_ms * 1.024) + 0.5;  
+
+    // Initialize counter to 0
     RTC.CNT = 0;
 
+    // Enable RTC and set prescaler to DIV1
     RTC.CTRLA = RTC_RTCEN_bm | RTC_PRESCALER_DIV1_gc;
-	//RTC.DBGCTRL |= RTC_DBGRUN_bm;
 
+    // Optional: run RTC in debug mode
+    // RTC.DBGCTRL |= RTC_DBGRUN_bm;
 }
 
+/*
+ * Disable the RTC.
+ */
 void RTC_OFF()
 {
-	RTC.CTRLA &= ~RTC_RTCEN_bm;
-	// 2?? Laukti, kol modulis sinchronizuosis
-	while (RTC.STATUS > 0);
+    // Disable RTC
+    RTC.CTRLA &= ~RTC_RTCEN_bm;
 
+    // Wait until RTC synchronization is complete
+    while (RTC.STATUS > 0);
 }

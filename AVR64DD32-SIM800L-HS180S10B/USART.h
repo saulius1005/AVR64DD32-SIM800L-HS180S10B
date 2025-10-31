@@ -17,7 +17,7 @@ typedef enum {
 	RS485_module
 } RS485orGNSS;
 
-typedef struct {
+typedef struct { //Testing structure for dummy data storage
 	char url[URL_LENGTH];
 	char dataBuffer[DATA_BUFFER_SIZE];
 	uint16_t azimuth;
@@ -33,6 +33,14 @@ typedef struct {
 	uint16_t bmp280P;
 	int16_t bmp280T;
 } RS485networkdata;
+
+typedef struct {
+	bool lost_connecton_fault;
+	bool lost_signal_fault;
+	bool data_fault;
+} RS485COM;
+
+extern RS485COM RS485;
 
 extern RS485networkdata RS485data;
 

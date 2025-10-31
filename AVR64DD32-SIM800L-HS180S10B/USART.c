@@ -4,171 +4,115 @@
  * Created: 2024-12-10 16:21:15
  * Author: Saulius
  *
- * @brief This file contains functions for initializing and using USART (Universal Synchronous Asynchronous Receiver Transmitter)
- *        for communication on two USART channels (USART0 and USART1). Functions for sending and receiving characters and strings
- *        as well as printing formatted messages are provided.
+ * This file contains functions for initializing and using USART communication.
+ * It supports two USART channels (USART0 and USART1) for sending and receiving
+ * characters, strings, and formatted text messages.
  */
 
 #include "Settings.h"
 #include "USARTVar.h"
 
-/**
- * @brief Initializes USART0 with a baud rate of 2500000.
- * 
- * This function configures USART0 for asynchronous communication, enabling both
- * transmission and reception at a baud rate of 2.5 Mbps with double-speed operation.
- */
+// Initialize USART0
+// Depending on the selected module (RS485 or GNSS), the function sets
+// the correct baud rate and routing configuration.
 void USART0_init(RS485orGNSS module) {
 	PORTMUX.USARTROUTEA = (PORTMUX.USARTROUTEA & ~PORTMUX_USART0_gm) | (module ? PORTMUX_USART0_ALT3_gc : PORTMUX_USART0_ALT2_gc);
-	USART0.BAUD = module? (uint16_t)USART0_BAUD_RATE(115200) : (uint16_t)USART0_BAUD_RATE(38400); // Set baud rate to 115,2 kbps for RS485 and for GNSS 38,4k
-	USART0.CTRLA = module? USART_RS485_ENABLE_gc : 0;
-	USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_RXMODE_CLK2X_gc; // Enable RX, TX, double speed mode
-	USART0.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc; // Configure for 8-bit, no parity, 1 stop bit, asynchronous mode
+	USART0.BAUD = module ? (uint16_t)USART0_BAUD_RATE(115200) : (uint16_t)USART0_BAUD_RATE(38400); // 115.2 kbps for RS485, 38.4 kbps for GNSS
+	USART0.CTRLA = module ? USART_RS485_ENABLE_gc : 0;
+	USART0.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_RXMODE_CLK2X_gc; // Enable RX, TX, double-speed mode
+	USART0.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc; // 8-bit, no parity, 1 stop bit
 }
 
+// Read one character from USART0 with a timeout.
+// If timeout occurs, RS485.lost_signal_fault is set to true.
 char USART0_readChar() {
 	USART0.STATUS = USART_RXCIF_bm; // Clear buffer before reading
-	uint64_t timeout_counter = RS485_TIMEOUT_COUNTER; // Set a timeout counter
-	while (!(USART0.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
-		if (--timeout_counter == 0) { // Timeout condition
+	uint64_t timeout_counter = 200000;
+	while (!(USART0.STATUS & USART_RXCIF_bm)) {
+		if (--timeout_counter == 0) {
 			RS485.lost_signal_fault = true;
-/*
-			st7735_draw_text(0, 0,"USART0 timeout", RED, BLACK);
-			_delay_ms(100);
-			st7735_draw_text(0, 0,"              ", RED, BLACK);*/
 			break;
 		}
 	}
-	return USART0.RXDATAL; // Return received character
+	return USART0.RXDATAL;
 }
-/*
-char USART0_readChar() {
-	USART0.STATUS = USART_RXCIF_bm; // Clear buffer before reading
-	while (!(USART0.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
-	}
-	return USART0.RXDATAL; // Return received character
-}
-*/
 
-/**
- * @brief Sends a single character via USART0.
- * 
- * This function waits until the USART0 data register is empty and then transmits a character.
- * 
- * @param c The character to send.
- */
+// Send a single character through USART0.
 void USART0_sendChar(char c) {
-	while (!(USART0.STATUS & USART_DREIF_bm)); // Wait for data register to be empty
-	USART0.TXDATAL = c; // Send character
+	while (!(USART0.STATUS & USART_DREIF_bm)); // Wait until buffer is empty
+	USART0.TXDATAL = c;
 }
 
-/**
- * @brief Sends a string via USART0.
- * 
- * This function sends each character of the string one by one using the USART0_sendChar function.
- * 
- * @param str The string to send.
- */
+// Send a string through USART0, one character at a time.
 void USART0_sendString(char *str) {
 	for (size_t i = 0; i < strlen(str); i++) {
-		USART0_sendChar(str[i]); // Send each character
+		USART0_sendChar(str[i]);
 	}
 }
 
-/**
- * @brief Initializes USART1 with a baud rate of 2500000.
- * 
- * This function configures USART1 for asynchronous communication, enabling both
- * transmission and reception at a baud rate of 2.5 Mbps with double-speed operation.
- */
+// Initialize USART1 with 460800 baud rate and double-speed mode.
 void USART1_init() {
-	USART1.BAUD = (uint16_t)USART1_BAUD_RATE(460800); // Set baud rate to 460.8 kbps
-	USART1.CTRLB = USART_RXEN_bm | USART_TXEN_bm  | USART_RXMODE_CLK2X_gc; // Enable RX, TX, double speed mode
-	USART1.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc; // Configure for 8-bit, no parity, 1 stop bit, asynchronous mode
+	USART1.BAUD = (uint16_t)USART1_BAUD_RATE(460800);
+	USART1.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_RXMODE_CLK2X_gc; // Enable RX, TX, double-speed
+	USART1.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHSIZE_8BIT_gc | USART_PMODE_DISABLED_gc | USART_SBMODE_1BIT_gc;
 }
 
-/**
- * @brief Sends a single character via USART1.
- * 
- * This function waits until the USART1 data register is empty and then transmits a character.
- * 
- * @param c The character to send.
- */
+// Send one character through USART1.
 void USART1_sendChar(char c) {
-	while (!(USART1.STATUS & USART_DREIF_bm)); // Wait for data register to be empty
-	USART1.TXDATAL = c; // Send character
+	while (!(USART1.STATUS & USART_DREIF_bm));
+	USART1.TXDATAL = c;
 }
 
-/**
- * @brief Sends a string via USART1.
- * 
- * This function sends each character of the string one by one using the USART1_sendChar function.
- * 
- * @param str The string to send.
- */
+// Send a string through USART1, one character at a time.
 void USART1_sendString(char *str) {
 	for (size_t i = 0; i < strlen(str); i++) {
-		USART1_sendChar(str[i]); // Send each character
+		USART1_sendChar(str[i]);
 	}
 }
-/**
- * @brief Reads a single character from USART1.
- * 
- * This function waits until a character is received on USART1, clears the receive interrupt flag, and then returns the received character.
- * If a timeout occurs, it returns a predefined warning.
- * 
- * @return The received character.
- */
+
+// Read one character from USART1 with timeout checking.
+// If timeout occurs, SIM800L.lost_signal_fault is set to true.
 char USART1_readChar() {
 	USART1.STATUS = USART_RXCIF_bm; // Clear buffer before reading
-	uint32_t timeout_counter = SIM800L_TIMEOUT_COUNTER; // Set a timeout counter
-	while (!(USART1.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
-		if (--timeout_counter == 0) { // Timeout condition
-// 			st7735_draw_text(0, 0,"USART1 timeout", RED, BLACK);
-// 			_delay_ms(100);
-// 			st7735_draw_text(0, 0,"              ", RED, BLACK);
+	uint32_t timeout_counter = SIM800L_TIMEOUT_COUNTER;
+	while (!(USART1.STATUS & USART_RXCIF_bm)) {
+		if (--timeout_counter == 0) {
 			SIM800L.lost_signal_fault = true;
-			break; //just exit from this while cycle
+			break;
 		}
 	}
-	return USART1.RXDATAL; // Return received character
+	return USART1.RXDATAL;
 }
 
+// Read one character from USART1 with RTC overflow as a timeout condition.
+// Used when RTC is responsible for timing control.
 char USART1_readCharRTC() {
-	USART1.STATUS = USART_RXCIF_bm; // Clear buffer before reading
-	while (!(USART1.STATUS & USART_RXCIF_bm)) { // Wait for data to be received
-		if (RTC.INTFLAGS&RTC_OVF_bm) //If time out
-			break; //just exit from this while cycle no reading any longer
+	USART1.STATUS = USART_RXCIF_bm;
+	while (!(USART1.STATUS & USART_RXCIF_bm)) {
+		if (RTC.INTFLAGS & RTC_OVF_bm) // Timeout detected
+			break;
 	}
-	return USART1.RXDATAL; // Return received character
+	return USART1.RXDATAL;
 }
 
-/**
- * @brief Sends a formatted string via the selected USART.
- * 
- * This function formats the input string with the provided arguments and sends it via the specified USART (either USART0 or USART1).
- * 
- * @param usart_number The USART number (0 or 1).
- * @param format The format string.
- * @param ... The arguments to be formatted into the string.
- */
+// Send formatted text through the selected USART channel.
+// usart_number = 0 sends via USART0, usart_number = 1 sends via USART1.
 void USART_printf(uint8_t usart_number, const char *format, ...) {
-	char buffer[128]; // Temporary buffer for formatted message
+	char buffer[128];
 	va_list args;
 	va_start(args, format);
-	vsnprintf(buffer, sizeof(buffer), format, args); // Format the message into the buffer
+	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
-	// Select the USART channel for sending the formatted string
 	if (usart_number == 0) {
-		USART0_sendString(buffer); // Use USART0 for sending
+		USART0_sendString(buffer);
 	} else if (usart_number == 1) {
-		USART1_sendString(buffer); // Use USART1 for sending
-	} else {
-		// Handle invalid USART number – add error management if needed
+		USART1_sendString(buffer);
 	}
 }
 
+// Convert numerical data into a hexadecimal character buffer for RS485 transmission.
+// All values are formatted and stored in RS485data.dataBuffer.
 void intData_to_hexChar(){
 	sprintf(RS485data.dataBuffer,
 	"%04X%04X%04X%02X%X%02X%X%03X%04X%03X%03X%04X",

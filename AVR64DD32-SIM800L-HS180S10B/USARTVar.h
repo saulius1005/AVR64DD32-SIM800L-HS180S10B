@@ -10,7 +10,7 @@
 #define USARTVAR_H_
 
 
-RS485networkdata RS485data = {
+RS485networkdata RS485data = { //dummy data initial values
 	.url ="http://yoururl.com/index.php?data=[",
 	.dataBuffer = {0},
 	.azimuth = 23750, //237,50
@@ -27,5 +27,10 @@ RS485networkdata RS485data = {
 	.bmp280T = 2133 //21,33C
 };
 
+RS485COM RS485 = {
+	.lost_connecton_fault = false,
+	.lost_signal_fault = false,
+	.data_fault = false
+};
 
 #endif /* USARTVAR_H_ */

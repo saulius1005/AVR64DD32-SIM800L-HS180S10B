@@ -1,48 +1,45 @@
 /*
  * SIM800L.h
  *
+ * Definitions for SIM800L GSM/GPRS module communication and status tracking.
+ *
  * Created: 2025-10-12 21:57:17
- *  Author: Saulius
- */ 
-
+ * Author: Saulius
+ */
 
 #ifndef SIM800L_H_
 #define SIM800L_H_
 
+#define SIM800L_TIMEOUT_COUNTER 270000 ///< Timeout counter for SIM800L operations
+#define MESSAGE_LENGTH_SIM800L 128     ///< Max length of SIM800L message buffer
 
-#define SIM800L_TIMEOUT_COUNTER 270000 ///< Timeout counter value for operations if baud k
-#define CountForError_FO 3
-#define Angle_Precizion 100 // 100 meaning exp. 360 degree 10 3600 (360,0), 1 36000 (360,00)
-#define U_I_Precizion 1 // 10 meaning 24, 1 240 (24.0)
-#define MESSAGE_LENGTH_SIM800L 128
-
-
+/*
+ * Structure to hold SIM800L state and data
+ */
 typedef struct {
-	bool bad_signal_fault;
-	bool lost_signal_fault;
-	bool data_fault;
-	bool lost_connecton_fault;
-	uint8_t faultcount;
-	char FreshDataPack[MESSAGE_LENGTH_SIM800L];
-	bool ready;
+    bool lost_signal_fault;      ///< Set if signal is lost
+    bool ready;                  ///< Flag indicating module ready status
 } SIM800Ldata;
 
-
-
-// --- Kompaktiðkas „Command-to-text“ lentelinis keitimas ---
+/*
+ * Structure for command replacement table
+ */
 typedef struct {
-	const char *match;
-	const char *replace;
+    const char *match;   ///< Command pattern to search
+    const char *replace; ///< Replacement string
 } CommandReplace_t;
 
+/*
+ * Structure for HTTP status code mapping
+ */
 typedef struct {
-	uint16_t code;
-	const char *text;
+    uint16_t code;       ///< HTTP status code
+    const char *text;    ///< Corresponding text description
 } HttpStatus_t;
 
-
-extern SIM800Ldata SIM800L;
-extern HttpStatus_t http_status_table[45];
-extern CommandReplace_t cmd_replace_table[7];
+/* External variables */
+extern SIM800Ldata SIM800L;              ///< Global SIM800L state
+extern HttpStatus_t http_status_table[45]; ///< Table of HTTP status codes and texts
+extern CommandReplace_t cmd_replace_table[8]; ///< Table for command-to-text replacements
 
 #endif /* SIM800L_H_ */

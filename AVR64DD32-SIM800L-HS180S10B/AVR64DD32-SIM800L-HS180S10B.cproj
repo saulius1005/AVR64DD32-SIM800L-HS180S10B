@@ -165,21 +165,6 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="RS485LED.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="RS485LED.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="RS485USART.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="RS485USART.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="RS485USARTVar.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="RTC.c">
       <SubType>compile</SubType>
     </Compile>
@@ -202,9 +187,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="ST7735.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ST7735Var.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="USART.c">

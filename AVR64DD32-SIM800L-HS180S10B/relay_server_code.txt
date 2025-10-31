@@ -1,0 +1,58 @@
+<?php
+// ---------------------------
+// SIM800L HTTP -> HTTPS relay
+// ---------------------------
+
+if (isset($_GET['data'])) {
+
+    header('Content-Type: text/plain');
+    header('Connection: close');
+
+    $data = urlencode($_GET['data']);
+
+    // Google Script URL
+    $google_url = "https://script.google.com/macros/s/yourscripturl/exec?data=$data";
+
+    // cURL užklausa
+    $ch = curl_init($google_url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 10,
+    ]);
+
+    $response = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
+
+    // Siunčiam tik trumpą atsakymą
+    if ($err) {
+        http_response_code(500);
+        $msg = "ERR";
+    } else {
+        $msg = "OK";
+    }
+
+    header('Content-Length: ' . strlen($msg));
+    echo $msg;
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>SunFlower Relay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        html,body{font-family:Arial,sans-serif;text-align:center;background:#FFEE00;color:#00AA00;margin:0;padding:0;}
+        h1{margin-top:50px;font-size:40px;}
+    </style>
+</head>
+<body>
+    <h1>SunFlower Data Relay</h1>
+    <p>Relay is active.</p>
+</body>
+</html>
