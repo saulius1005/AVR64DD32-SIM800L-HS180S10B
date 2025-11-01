@@ -38,6 +38,50 @@ The data logger consists of the following modules:
 - **BK280 GNSS module** – used for local time acquisition and display.  
 - **HS180S10B LCD display** – displays system messages and process information.  
 
+**Main Pin Configuration**
+
+The main I/O pin settings are located in the ``` GPIO.c ``` file:
+
+```c
+void GPIO_init() {
+    // Configure USART0 and USART1 pin routing
+    PORTMUX.USARTROUTEA = PORTMUX_USART1_DEFAULT_gc; // USART1 default pins
+    PORTMUX.SPIROUTEA = PORTMUX_SPI0_DEFAULT_gc;     // SPI0 default routing
+
+    // Configure PORTA pins as output:
+    // PA2 - USART0 TXD (BK280 GNSS)
+    // PA3 - USART0 RXD (BK280 GNSS)
+    // PA4 - MOSI
+    // PA6 - SCK
+    // PA7 - CS
+    PORTA.DIRSET = PIN2_bm | PIN4_bm | PIN6_bm | PIN7_bm;
+
+    // Configure PORTA pins for GNSS USART0:
+    PORTA.PIN2CTRL = PORT_PULLUPEN_bm; // Enable pull-up for TX
+    PORTA.PIN3CTRL = PORT_PULLUPEN_bm; // Enable pull-up for RX
+
+    // Configure PORTC pins for USART1 (SIM800L): PC0=TX, PC1=RX
+    PORTC.DIRSET = PIN0_bm;            // TX output
+    PORTC.DIRCLR = PIN1_bm;            // RX input
+    PORTC.PIN0CTRL = PORT_PULLUPEN_bm; // Enable pull-up for TX
+    PORTC.PIN1CTRL = PORT_PULLUPEN_bm; // Enable pull-up for RX
+
+    // Configure PORTD pins as output for screen control: PD2=DC, PD3=RES
+    PORTD.DIRSET = PIN2_bm | PIN3_bm;
+}
+```
+
+Additional control pin macros are defined in the ``` ST7735.h ``` file:
+
+```c
+#define DC_LOW()   PORTD.OUTCLR = PIN2_bm
+#define DC_HIGH()  PORTD.OUTSET = PIN2_bm
+#define RES_LOW()  PORTD.OUTCLR = PIN3_bm
+#define RES_HIGH() PORTD.OUTSET = PIN3_bm
+#define CS_LOW()   PORTA.OUTCLR = PIN7_bm
+#define CS_HIGH()  PORTA.OUTSET = PIN7_bm
+```
+
 ---
 
 ### Operating Principle
