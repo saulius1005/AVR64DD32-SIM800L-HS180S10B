@@ -25,7 +25,7 @@ int main()
 
     // --- Run loading animations ---
     generic_animation(sim800l_check, "Checking SIM...", "SIM Prepared!");
-    generic_animation(gnss_check, "Searching GNSS...", "GNSS Locked!");
+    //generic_animation(gnss_check, "Searching GNSS...", "GNSS Locked!");
     // Note: GNSS synchronization may take from a few seconds to ~30 minutes depending on signal
 
     // --- Read initial GNSS data and display it ---

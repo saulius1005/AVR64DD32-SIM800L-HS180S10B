@@ -11,7 +11,7 @@
 
 
 RS485networkdata RS485data = { //dummy data initial values
-	.url ="http://yoururl.com/index.php?data=[",
+	.url ="http://http://yoururl.com/index.php?data=[",
 	.dataBuffer = {0},
 	.azimuth = 23750, //237,50
 	.elevation = 1230, //12,30
