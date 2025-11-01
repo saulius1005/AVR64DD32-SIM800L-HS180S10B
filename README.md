@@ -199,3 +199,5 @@ Finally, the system begins **sending data** and verifies the **server response**
 ![IMG_20251030_155451_163](https://github.com/user-attachments/assets/8ea33482-da9d-441c-aa36-51b2d3c26e5b)
 
 ![IMG_20251030_155506_958](https://github.com/user-attachments/assets/17b56aaf-4190-403b-9745-162b3150a354)
+
+> **Note:** This data logger code will later be used as the foundation for the “SunFlower” data logger (the hardware and firmware will be modified).
